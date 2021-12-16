@@ -1,36 +1,47 @@
-package returnvaluewithExecutor;
+package withobserver;
 
-import withobserver.SumObserver;
-
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-public class SumTask implements Callable<Integer> {
-
+class SumTask implements Runnable
+{
     private int data[];
     private long sleepTime;
     private int sum = 0 ; // will hold result and need to show for result
+    private SumObserver observer;
     private String taskId ="Task";
     private static int counter = 0;
 
-    public SumTask(long sleepTime,int ...data) {
+    public SumTask(SumObserver observer,long sleepTime,int ...data) {
         this.data = data;
         this.sleepTime = sleepTime;
+        this.observer = observer;
         taskId = taskId+ ++counter;
     }
-    @Override
-    public Integer call() throws Exception {
-        String currentThreadName = Thread.currentThread().getName();
-        System.out.println("***"+currentThreadName + "with Task "+taskId+" Started *****");
-        TimeUnit.MILLISECONDS.sleep(sleepTime);
-        System.out.println("***"+currentThreadName + "with Task "+taskId+" Woke up *****");
 
+
+    @Override
+    public void run() {
+        System.out.println("*****"+Thread.currentThread().getName()+" started working ****");
+        try
+        {
+            System.out.println("*****"+Thread.currentThread().getName()+" going to sleep for "+sleepTime+" ms ****");
+            TimeUnit.MILLISECONDS.sleep(sleepTime);
+        }catch(Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        System.out.println("*****"+Thread.currentThread().getName()+" woke up from sleep for ****");
         for(int ele : data)
         {
             sum+=ele;
         }
 
-        System.out.println("***"+currentThreadName + "with Task "+taskId+" completed *****");
-        return  sum;
+        System.out.println("*****"+Thread.currentThread().getName()+" completed  and going to notify observer ****");
+
+        observer.notifyResult(sum);
+
     }
+
+
+
 }
